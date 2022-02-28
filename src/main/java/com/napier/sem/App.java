@@ -220,8 +220,7 @@ public class App
      */
     public ArrayList<Employee> getAllSalaries()
     {
-        try
-        {
+        try {
             //Create an SQL statement
             Statement stmt = con.createStatement();
 
