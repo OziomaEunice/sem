@@ -8,6 +8,12 @@ public class App {
         // Create new Application
         App a = new App();
 
+        if(args.length < 1){
+            a.connect("localhost:33060", 30000);
+        }else{
+            a.connect(args[0], Integer.parseInt(args[1]));
+        }
+
         // Connect to database
         a.connect();
 
@@ -18,19 +24,25 @@ public class App {
         //a.displayEmployee(emp);
 
         // Extract employee salary information
-        ArrayList<Employee> employees = a.getAllSalaries();
+        //ArrayList<Employee> employees = a.getAllSalaries();
 
         // Test the size of the returned data - should be 240124
-        System.out.println(employees.size());
+        //System.out.println(employees.size());
 
         //Print salaries
-        a.printSalaries(employees);
+        //a.printSalaries(employees);
 
         //Extract employee salary (department) information
         //ArrayList<Employee> employees1 = a.getSalariesByDepartment();
 
         //Get Employee
-        Department dep = a.getDepartment("Sales");
+        //Department dep = a.getDepartment("Sales");
+
+        Department dept = a.getDepartment("Development");
+        ArrayList<Employee> employees = a.getSalariesByDepartment(dept);
+
+        // Print salary report
+        a.printSalaries(employees);
 
         // Disconnect from database
         a.disconnect();
@@ -340,6 +352,45 @@ public class App {
             System.out.println(e.getMessage());
             System.out.println("Failed to get salary details");
             return null;
+        }
+    }
+
+
+    /**
+     * The method definition adds location and delay parameters.
+     *
+     * Class.forName which uses the most up-to-date MySQL driver.
+     *
+     * Driver.getConnection uses the location, and also updates the parameters
+     * to use allowPublicKeyRetrieval=true as we are using a more up-to-date version of MySQL.
+     */
+    public void connect(String location, int delay) {
+        try {
+            // Load Database driver
+            Class.forName("com.mysql.cj.jdbc.Driver");
+        } catch (ClassNotFoundException e) {
+            System.out.println("Could not load SQL driver");
+            System.exit(-1);
+        }
+
+        int retries = 10;
+        for (int i = 0; i < retries; ++i) {
+            System.out.println("Connecting to database...");
+            try {
+                // Wait a bit for db to start
+                Thread.sleep(delay);
+                // Connect to database
+                con = DriverManager.getConnection("jdbc:mysql://" + location
+                                + "/employees?allowPublicKeyRetrieval=true&useSSL=false",
+                        "root", "example");
+                System.out.println("Successfully connected");
+                break;
+            } catch (SQLException sqle) {
+                System.out.println("Failed to connect to database attempt " + Integer.toString(i));
+                System.out.println(sqle.getMessage());
+            } catch (InterruptedException ie) {
+                System.out.println("Thread interrupted? Should not happen.");
+            }
         }
     }
 }
